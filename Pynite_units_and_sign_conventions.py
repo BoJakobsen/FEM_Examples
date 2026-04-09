@@ -53,7 +53,7 @@ Iz = 0    # [m⁴]
 J  = 0    # [m⁴]  
 
 # Define A "section"
-model.add_section('TrussSection', A, Iy, Iz, J)
+model.add_section('Section', A, Iy, Iz, J)
 
 # ============================================================================
 # Build and "solve" the model
@@ -69,10 +69,11 @@ model.add_node('N1', 0, 0, 0)
 model.add_node('N2', 0, -L, 0)
 
 # --- Members (bars) ---
-model.add_member('M1', 'N1', 'N2', 'Steel', 'TrussSection')   # bottom horizontal
+model.add_member('M1', 'N1', 'N2', 'Steel', 'Section')   # bottom horizontal
 
 # --- Supports ---
 # def_support(node, DX, DY, DZ, RX, RY, RZ) - True means fixed
+# All rotations fixed, as no rotation is present in this model
 # Pin at N1: fix all translations
 model.def_support('N1', True, True, True, True, True, True)
 # Node 2: fix in X and Z (as this is an 1D example)
@@ -86,10 +87,10 @@ F0 = 1000
 model.add_node_load('N2', 'FY', -F0, 'PointForce')
 
 # Define scenarios for handling different load cases in on solve
-# Scenario A: self weight 
+# Scenario A: self weight
 model.add_load_combo('SC_A_SelfWeight', {'SelfWeight': 1.0})
 
-# Scenario B: point force 
+# Scenario B: point force
 model.add_load_combo('SC_B_PointForce', { 'PointForce': 1.0})
 
 # Analyze (solves all load cases and combos in one pass)
