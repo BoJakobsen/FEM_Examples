@@ -48,9 +48,9 @@ model.add_material('Steel', E, G, nu, rho_weight)
 # Only A matters in this example because there is no bending.
 
 A  = 1e-2    # [m²]  — 10cm × 10cm square bar
-Iy = 0    # [m⁴]  
-Iz = 0    # [m⁴]  
-J  = 0    # [m⁴]  
+Iy = 1    # [m⁴]  
+Iz = 1    # [m⁴]  
+J  = 1    # [m⁴]  
 
 # Define A "section"
 model.add_section('Section', A, Iy, Iz, J)
@@ -94,8 +94,8 @@ model.add_load_combo('SC_A_SelfWeight', {'SelfWeight': 1.0})
 model.add_load_combo('SC_B_PointForce', { 'PointForce': 1.0})
 
 # Analyze (solves all load cases and combos in one pass)
-model.analyze()
-
+#model.analyze(log=True, check_stability=True, check_statics=True)  # gives more info
+model.analyze() 
 
 # ============================================================================
 # Print and compare results
