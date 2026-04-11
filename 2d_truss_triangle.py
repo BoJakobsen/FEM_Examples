@@ -19,23 +19,19 @@ import numpy as np
 # Create model object
 model = FEModel3D()
 
-# ============================================================================
 # Material definition
-# ============================================================================
 
 # All set to 1 for simplicity 
 E  = 1       # Young's modulus  [force/area]
-G  = 1       # Shear modulus    [force/area]  (not used for trusses)
-nu = 0.3     # Poisson's ratio  [-]           (not used for trusses)
+G  = 1       # Shear modulus    [force/area]  
+nu = 0.3     # Poisson's ratio  [-]           
 rho = 0      # Weight density   [force/volume] — set to 0: no self-weight
 
 model.add_material('Mat', E, G, nu, rho)
 
 
-
-# ============================================================================
 # Cross-section definition
-# ============================================================================
+
 # A beam element in PyNite needs four section properties:
 #   A  — cross-sectional area [m²]:  determines axial stiffness (EA)
 #   Iy — second moment of area about local y-axis [m⁴]: bending stiffness (EI_y)
@@ -56,22 +52,19 @@ J  = 0
 model.add_section('Sec', A, Iy, Iz, J)
 
 
-# ============================================================================
 # Build and "solve" the model
-# ============================================================================
 
-# --- Nodes (name, X, Y, Z) ---
-# Z = 0 for all nodes: this is a 2D problem in the XY-plane.
+# Nodes (name, X, Y, Z)
 model.add_node('N1', 0, 0, 0)
 model.add_node('N2', 2, 0, 0)
 model.add_node('N3', 1, 1, 0)
 
-# --- Members (bars) ---
+# Members (bars) 
 model.add_member('M1', 'N1', 'N2', 'Mat', 'Sec')   # bottom horizontal
 model.add_member('M2', 'N2', 'N3', 'Mat', 'Sec')   # right diagonal
 model.add_member('M3', 'N1', 'N3', 'Mat', 'Sec')   # left diagonal
 
-# --- Supports ---
+# Supports
 # Each support definition handles 6 DOF.
 # DX, DY, DZ  (translations)  and  RX, RY, RZ  (rotations)
 # True = fixed (that DOF is constrained), False = free.
@@ -82,7 +75,7 @@ model.def_support('N1', True,  True,  True, True, True, True)  # pin
 model.def_support('N2', False, True,  True, True, True, True)  # roller
 model.def_support('N3', False, False, True, True, True, True)  # free, but locked in Z
 
-# --- Release bending moments ---
+# Release bending moments
 # Truss's are achieved by releasing the bending rotations (Ry, Rz) at both
 # ends of every member.
 
@@ -95,21 +88,21 @@ for m in model.members.keys(): # loop over all members
         False, False, False, False, True, True)   # j-end: release Ry, Rz
 
 
-# --- Apply external load ---
+# Apply external load
 # A unit downward force on the free node N3.
 Fload = -1
 model.add_node_load('N3', 'FY', Fload)
 
 
-# ── Solve ────────────────────────────────────────────────────────
+# Solve
 
 model.analyze()
 
 
 
-# ── Results ──────────────────────────────────────────────────────
+# Results
 
-# --- Reaction forces at supports ---
+# Reaction forces at supports
 print("=== Reactions ===")
 for name in ['N1', 'N2']:
     n = model.nodes[name]
@@ -119,9 +112,8 @@ for name in ['N1', 'N2']:
 print(f"Expected sum Fy = -Fload = {-Fload} ")
 print(f"Expected sum Fx = 0 ")
 
-# --- Axial forces ---
-# PyNite sign convention: positive = compression, negative = tension.
-# (This is opposite to the usual structural engineering convention.)
+# Axial forces
+# PyNite sign: positive = compression, negative = tension.
 
 print("\n=== Axial forces (PyNite: + = compression, − = tension) ===")
 for name in ['M1', 'M2', 'M3']:
@@ -130,7 +122,7 @@ for name in ['M1', 'M2', 'M3']:
     print(f"  {name}:  N = {N:+.4f} ")
 print(f" Expected from Method of joints. M1:  -0.5, M2: {np.sqrt(2)/2:.4f}, M3: {np.sqrt(2)/2:.4f}")
 
-# --- Nodal displacements ---
+# Nodal displacements
 print("\n=== Displacements ===")
 for name in ['N1', 'N2', 'N3']:
     n = model.nodes[name]
@@ -139,7 +131,7 @@ for name in ['N1', 'N2', 'N3']:
     print(f"  {name}:  dx = {dx:+.6f},  dy = {dy:+.6f}")
 
 
-# --- Rotations (should be zero for a truss) ---
+# Rotations (should be zero for a truss)
 print("\n=== Rotations===")
 for name in ['N1', 'N2', 'N3']:
     theta = model.nodes[name].RZ['Combo 1']
