@@ -3,6 +3,6 @@ Some examples of using [Pynite](https://github.com/JWock82/Pynite) for truss FEM
 
   * Examples clarifying units used in Pynite (Specially relevant for non US users)
   * The simplest non trivial 3 node system
-  * A framework for simple rotational symmetric structures
+  * Two frameworks for simple rotational symmetric structures
   
 Official Pynite Documentation: https://pynite.readthedocs.io/en/latest/index.html

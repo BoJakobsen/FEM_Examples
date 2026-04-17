@@ -278,3 +278,5 @@ for i in range(NSEG):
     Fz_total += Fz
     print(f"  N0_{i}:    {Fz:>12.4f}")
 print(f"  {'Sum:':>7}  {Fz_total:>12.4f}  (should equal total load {total_load:.2f})")
+
+
