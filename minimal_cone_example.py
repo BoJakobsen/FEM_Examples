@@ -1,4 +1,4 @@
-r"""
+"""
 Cone — a minimal rotational symmetric structural analysis example
 =====================================================
 
@@ -34,9 +34,7 @@ import numpy as np
 from Pynite import FEModel3D
 
 
-# ============================================================================
 # Geometry of the cone
-# ============================================================================
 R = 1.0      # Base radius [m]
 H = 1.0      # Height [m]
 NSEG = 6     # Sides per hoop
@@ -55,9 +53,8 @@ z_rings = np.array([0.0, H / 2])        # heights of ring 0 and ring 1
 r_rings = R * (1 - z_rings / H)          # radii:  [R, R/2]
 
 
-# ============================================================================
 # Shell surface area for a cone
-# ============================================================================
+
 # The cone surface between two heights is a "frustum" (truncated cone).
 # Its lateral surface area is:
 #
@@ -80,7 +77,7 @@ print("=== Strip areas (analytical) ===")
 for k in range(n_strips):
     dr = r_levels[k] - r_levels[k + 1]
     dz = z_levels[k + 1] - z_levels[k]
-    s = np.sqrt(dr**2 + dz**2)                          # slant height
+    s = np.sqrt(dr**2 + dz**2)                          
     strip_areas[k] = np.pi * (r_levels[k] + r_levels[k + 1]) * s
     print(f"  Strip {k}: r = [{r_levels[k]:.2f}, {r_levels[k+1]:.2f}], "
           f"s = {s:.4f} m, A = {strip_areas[k]:.4f} m²")
@@ -110,9 +107,8 @@ print(f"  Ring 1 (middle): {ring1_node_area:.4f} m²/node  "
 print(f"  Apex:            {apex_node_area:.4f} m²  (single node)")
 
 
-# ============================================================================
 # Shell weight
-# ============================================================================
+
 # Weight per unit area of the shell surface:
 #   q = density × gravity × thickness    [N/m²]
 
@@ -136,15 +132,10 @@ print(f"  F at apex:         {F_apex:.2f} N")
 print(f"  Total load:        {total_load:.2f} N")
 
 
-# ============================================================================
 # Build the PyNite model
-# ============================================================================
 model = FEModel3D()
 
-
-
-
-# --- Material ---
+# Material
 # For a truss only E and A matter.  G, nu are required by PyNite but
 # don't affect the results for a truss model
 E  = 200e9      # [Pa]  Young's modulus (steel)
@@ -152,12 +143,12 @@ G  = 80e9       # [Pa]  shear modulus (unused for truss)
 nu = 0.25       # [-]   Poisson's ratio (unused for truss)
 model.add_material('Steel', E, G, nu, 0)   # rho=0: we apply loads manually
 
-# --- Section ---
+# Section
 # Only A matters for a truss.  Iy, Iz, J are placeholders.
 A_bar = 1e-2    # [m²] cross-section of each bar
 model.add_section('Sec', A_bar, 1, 1, 1)
 
-# --- Nodes ---
+# Nodes
 # Ring 0 (base): hexagon at z=0, radius R
 # Ring 1 (middle): hexagon at z=H/2, radius R/2
 for ring_idx, (r, z) in enumerate(zip(r_rings, z_rings)):
@@ -172,7 +163,7 @@ for ring_idx, (r, z) in enumerate(zip(r_rings, z_rings)):
 # Apex: single node
 model.add_node('Napex', 0, 0, H)
 
-# --- Members ---
+# Members
 # Hoop members: connect adjacent nodes within each ring
 for ring_idx in range(len(r_rings)):
     for i in range(NSEG):
@@ -195,9 +186,8 @@ for i in range(NSEG):
                      'Steel', 'Sec')
 
 
-# ============================================================================
 # Supports
-# ============================================================================
+
 # Base fix vertical displacement (DZ) everywhere.
 # Also need to prevent rigid body sliding (DX, DY) and spinning (RZ).
 # One node is fully pinned and one opposite node pined in Y (prevents spin).
@@ -219,9 +209,7 @@ for name in model.nodes:
     if not is_supported:
         model.def_support(name, False, False, False, True, True, True)
 
-# ============================================================================
 # Truss: release moments + constrain unused rotational DOFs
-# ============================================================================
 # Release bending at both ends of every member → pin-jointed truss
 for name in model.members:
     model.def_releases(name,
@@ -230,24 +218,18 @@ for name in model.members:
 
 
 
-# ============================================================================
+
 # Apply loads
-# ============================================================================
 for i in range(NSEG):
     model.add_node_load(f'N0_{i}', 'FZ', -F_ring0)
     model.add_node_load(f'N1_{i}', 'FZ', -F_ring1)
 model.add_node_load('Napex', 'FZ', -F_apex)
 
-
-# ============================================================================
 # Solve
-# ============================================================================
 model.analyze()
 
 
-# ============================================================================
 # Results
-# ============================================================================
 print("\n" + "=" * 55)
 print(f"Cone :  R = {R} m,  H = {H} m,  {NSEG}-sided polygons")
 print("=" * 55)
